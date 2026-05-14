@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>thesis-companion — Nederlands & lezen voor Gülpembe</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">⌘</span>
+      <h1>thesis-companion</h1>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-tab="vandaag" role="tab">vandaag</button>
+      <button class="tab" data-tab="herhalen" role="tab">herhalen <span class="badge" id="due-badge">0</span></button>
+      <button class="tab" data-tab="lijst" role="tab">lijst</button>
+      <button class="tab" data-tab="nieuw" role="tab">nieuw</button>
+      <button class="tab" data-tab="plan" role="tab">plan <span class="badge muted-badge" id="plan-badge">0/60</span></button>
+      <button class="tab" data-tab="stats" role="tab">stats</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ========== VANDAAG (dashboard) ========== -->
+    <section class="panel" id="panel-vandaag" data-panel="vandaag">
+      <div class="day-header">
+        <div class="day-label muted small" id="vandaag-datum">—</div>
+        <h2 id="vandaag-titel">—</h2>
+        <div class="day-theme muted" id="vandaag-thema"></div>
+      </div>
+
+      <div id="vandaag-buiten-periode" class="empty hidden">
+        <h3 id="vbp-titel">Buiten de routine-periode</h3>
+        <p class="muted" id="vbp-uitleg">—</p>
+        <p class="small muted">Je kan altijd door het plan bladeren of woorden oefenen.</p>
+        <div class="row">
+          <button class="btn-ghost" data-go="plan">→ Plan openen</button>
+          <button class="btn-ghost" data-go="herhalen">→ Woorden oefenen</button>
+        </div>
+      </div>
+
+      <div id="vandaag-actief" class="hidden">
+        <article class="day-card">
+          <header class="day-card-h">
+            <span class="day-tag">lezen</span>
+            <label class="check-inline">
+              <input type="checkbox" id="vandaag-read-done" />
+              <span>voltooid</span>
+            </label>
+          </header>
+          <p class="day-read" id="vandaag-read">—</p>
+        </article>
+
+        <article class="day-card">
+          <header class="day-card-h">
+            <span class="day-tag">schrijven</span>
+            <label class="check-inline">
+              <input type="checkbox" id="vandaag-write-done" />
+              <span>voltooid</span>
+            </label>
+          </header>
+          <p class="day-write" id="vandaag-write">—</p>
+          <textarea
+            id="vandaag-textarea"
+            class="day-textarea"
+            placeholder="Schrijf hier je antwoord. Wordt automatisch opgeslagen."
+            spellcheck="true"
+          ></textarea>
+          <div class="day-textarea-meta muted small">
+            <span id="vandaag-wordcount">0 woorden</span> ·
+            <span id="vandaag-savedat">nog niet opgeslagen</span>
+          </div>
+        </article>
+
+        <article class="day-card woorden-cta">
+          <header class="day-card-h">
+            <span class="day-tag">woorden</span>
+          </header>
+          <p id="vandaag-woorden-summary">—</p>
+          <div class="row">
+            <button class="btn-primary" data-go="herhalen" id="vandaag-begin-herhaling">Begin met herhalen</button>
+            <button class="btn-ghost" data-go="nieuw">+ Nieuw woord</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== HERHALEN (was: review) ========== -->
+    <section class="panel hidden" id="panel-herhalen" data-panel="herhalen">
+      <div id="review-empty" class="empty hidden">
+        <h2>Niets te herhalen vandaag.</h2>
+        <p class="muted">Voeg een nieuw woord toe of wacht tot een kaart weer aan de beurt is.</p>
+        <button class="btn-primary" data-go="nieuw">+ Nieuw woord</button>
+      </div>
+
+      <div id="review-card" class="card hidden">
+        <div class="card-meta">
+          <span id="card-progress" class="muted small"></span>
+        </div>
+
+        <div class="card-front">
+          <div class="word-label muted small">Nederlands</div>
+          <div id="card-nl" class="word"></div>
+          <div id="card-voorbeeld-front" class="example muted hidden"></div>
+        </div>
+
+        <div class="card-back hidden" id="card-back">
+          <hr />
+          <div class="meaning-row">
+            <span class="meaning-label muted small">TR</span>
+            <span id="card-tr" class="meaning"></span>
+          </div>
+          <div class="meaning-row" id="row-nldef">
+            <span class="meaning-label muted small">NL</span>
+            <span id="card-nldef" class="meaning"></span>
+          </div>
+          <div id="card-voorbeeld-back" class="example muted hidden"></div>
+          <div id="card-notitie" class="notitie muted small hidden"></div>
+        </div>
+
+        <div class="card-actions">
+          <button id="btn-show" class="btn-primary">Toon antwoord <kbd>space</kbd></button>
+
+          <div id="rate-buttons" class="rate-row hidden">
+            <button class="rate again" data-rate="again">
+              <span class="rate-label">opnieuw</span>
+              <span class="rate-interval" data-int="again"></span>
+              <kbd>1</kbd>
+            </button>
+            <button class="rate hard" data-rate="hard">
+              <span class="rate-label">moeilijk</span>
+              <span class="rate-interval" data-int="hard"></span>
+              <kbd>2</kbd>
+            </button>
+            <button class="rate good" data-rate="good">
+              <span class="rate-label">goed</span>
+              <span class="rate-interval" data-int="good"></span>
+              <kbd>3</kbd>
+            </button>
+            <button class="rate easy" data-rate="easy">
+              <span class="rate-label">makkelijk</span>
+              <span class="rate-interval" data-int="easy"></span>
+              <kbd>4</kbd>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LIJST ========== -->
+    <section class="panel hidden" id="panel-lijst" data-panel="lijst">
+      <div class="list-toolbar">
+        <input type="search" id="search" placeholder="zoek in je woorden…" />
+        <span class="muted small" id="list-count"></span>
+      </div>
+      <div id="list-empty" class="empty hidden">
+        <h2>Nog geen woorden.</h2>
+        <p class="muted">Begin met je eerste woord toe te voegen.</p>
+        <button class="btn-primary" data-go="nieuw">+ Nieuw woord</button>
+      </div>
+      <table class="word-table hidden" id="word-table">
+        <thead>
+          <tr>
+            <th>Nederlands</th>
+            <th>TR</th>
+            <th>NL betekenis</th>
+            <th class="num">Volgende</th>
+            <th class="num">Herh.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="word-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ========== NIEUW ========== -->
+    <section class="panel hidden" id="panel-nieuw" data-panel="nieuw">
+      <form id="form-new" autocomplete="off">
+        <h2 id="form-title">Nieuw woord</h2>
+        <input type="hidden" id="edit-id" />
+
+        <label>
+          <span>Nederlands woord <em>*</em></span>
+          <input type="text" id="f-nl" required placeholder="het boek" autofocus />
+        </label>
+
+        <label>
+          <span>Türkçe karşılık <em>*</em></span>
+          <input type="text" id="f-tr" required placeholder="kitap" />
+        </label>
+
+        <label>
+          <span>Nederlandse uitleg <small class="muted">(optioneel — voor Dutch-only oefenen later)</small></span>
+          <input type="text" id="f-nldef" placeholder="een gedrukt werk dat je kan lezen" />
+        </label>
+
+        <label>
+          <span>Voorbeeldzin <small class="muted">(optioneel)</small></span>
+          <input type="text" id="f-voorbeeld" placeholder="Ik lees elke avond een boek." />
+        </label>
+
+        <label>
+          <span>Notitie <small class="muted">(optioneel — bv. lidwoord, woordsoort)</small></span>
+          <input type="text" id="f-notitie" placeholder="het-woord, zelfstandig naamwoord" />
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Opslaan <kbd>↵</kbd></button>
+          <button type="button" id="btn-cancel-edit" class="btn-ghost hidden">Annuleren</button>
+        </div>
+        <p class="muted small" id="form-hint">Tip: <kbd>Tab</kbd> om tussen velden te springen, <kbd>Enter</kbd> om op te slaan.</p>
+      </form>
+    </section>
+
+    <!-- ========== PLAN (60-day reading routine) ========== -->
+    <section class="panel hidden" id="panel-plan" data-panel="plan">
+      <div class="plan-header">
+        <h2>Leesroutine — 15 mei → 13 juli 2026</h2>
+        <div class="plan-progress">
+          <div class="plan-progress-bar">
+            <div class="plan-progress-fill" id="plan-progress-fill"></div>
+          </div>
+          <div class="muted small" id="plan-progress-text">0 / 60 dagen voltooid</div>
+        </div>
+        <div class="plan-toolbar">
+          <button class="btn-ghost small" id="plan-jump-today">→ Spring naar vandaag</button>
+          <button class="btn-ghost small" id="plan-expand-all">Alles openen</button>
+          <button class="btn-ghost small" id="plan-collapse-all">Alles sluiten</button>
+        </div>
+      </div>
+      <div id="plan-weeks"></div>
+    </section>
+
+    <!-- ========== STATS ========== -->
+    <section class="panel hidden" id="panel-stats" data-panel="stats">
+      <h2>Statistieken</h2>
+
+      <h3>Woorden</h3>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-label muted small">totaal woorden</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-due">0</div>
+          <div class="stat-label muted small">vandaag te doen</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-new">0</div>
+          <div class="stat-label muted small">nieuwe (nog niet gezien)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-mature">0</div>
+          <div class="stat-label muted small">rijp (≥21 dagen interval)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-streak">0</div>
+          <div class="stat-label muted small">dagen op rij</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-reviews">0</div>
+          <div class="stat-label muted small">herhalingen vandaag</div>
+        </div>
+      </div>
+
+      <h3>Leesroutine</h3>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-num" id="stat-plan-days">0</div>
+          <div class="stat-label muted small">dagen volledig voltooid</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-plan-read">0</div>
+          <div class="stat-label muted small">leesopdrachten af</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-plan-write">0</div>
+          <div class="stat-label muted small">schrijfopdrachten af</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-plan-words">0</div>
+          <div class="stat-label muted small">eigen woorden geschreven</div>
+        </div>
+      </div>
+
+      <h3>Backup</h3>
+      <div class="row">
+        <button id="btn-export" class="btn-ghost">⬇ Exporteer alles</button>
+        <button id="btn-import" class="btn-ghost">⬆ Importeer JSON</button>
+        <input type="file" id="import-file" accept="application/json" hidden />
+      </div>
+      <p class="muted small">Alles wordt in deze browser opgeslagen. Maak af en toe een export voor de zekerheid.</p>
+
+      <h3 class="danger-h3">Gevarenzone</h3>
+      <div class="row">
+        <button id="btn-reset-words" class="btn-danger">Alle woorden wissen</button>
+        <button id="btn-reset-plan" class="btn-danger">Plan-voortgang wissen</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="plan-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

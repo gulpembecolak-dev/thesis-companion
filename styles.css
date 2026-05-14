@@ -570,3 +570,147 @@ form input[type="text"]:focus {
   }
   .plan-day .d-read { font-size: 0.85rem; }
 }
+
+/* ============ typography upgrade (Cormorant + Inter Tight) ============ */
+:root {
+  --font-sans: "Inter Tight", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  --font-serif: "Cormorant Garamond", "Iowan Old Style", "Apple Garamond", Georgia, "Times New Roman", serif;
+}
+body { font-feature-settings: "ss01", "cv11"; }
+
+/* hero word — bigger, more book-like */
+.word {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.card-back .meaning { font-family: var(--font-sans); }
+
+/* tab text — slightly tighter */
+.tab { font-family: var(--font-sans); letter-spacing: -0.005em; }
+
+/* h1 brand */
+.brand h1 { font-family: var(--font-serif); font-weight: 500; font-size: 1.3rem; letter-spacing: -0.01em; }
+h2 { font-family: var(--font-serif); font-size: 1.55rem; font-weight: 500; letter-spacing: -0.01em; }
+h3 { font-family: var(--font-sans); }
+
+/* ============ card: 3D flip ============ */
+.card {
+  perspective: 1400px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+.card-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 360px;
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2.5rem 2rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+.card-back {
+  transform: rotateY(180deg);
+  text-align: left;
+  justify-content: flex-start;
+  padding: 2.5rem 2.5rem 2rem;
+}
+.card-meta { text-align: right; margin-bottom: 0.5rem; }
+.card-face-actions { margin-top: 1.75rem; }
+.card-back .card-face-actions { margin-top: auto; padding-top: 1.5rem; }
+/* keep meaning rows spaced */
+.card-back .meaning-row { margin-bottom: 1rem; }
+
+/* empty state — more deliberate */
+.empty { padding: 5rem 1rem; }
+.empty-mark {
+  font-size: 2.25rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.3em;
+  padding-left: 0.3em;
+}
+.empty h2 { font-family: var(--font-serif); font-size: 1.65rem; font-weight: 400; margin: 0 0 0.6rem; }
+.empty p { max-width: 380px; margin: 0 auto 1.4rem; line-height: 1.55; }
+
+/* ============ plan heatmap (60-dot overview) ============ */
+.plan-heatmap {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  margin: 0 0 1.75rem;
+  padding: 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.heat-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: var(--line);
+  cursor: pointer;
+  position: relative;
+  font-size: 0.6rem;
+  font-family: var(--font-sans);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid transparent;
+  transition: transform 0.12s, background 0.12s, border-color 0.12s;
+}
+.heat-cell:hover { transform: scale(1.12); border-color: var(--accent); }
+.heat-cell.done { background: var(--good); color: rgba(255,255,255,0.85); }
+.heat-cell.is-today {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(197,107,77,0.18);
+}
+.heat-cell.is-today:not(.done) { background: var(--bg); }
+
+/* week label tweak — slightly more bookish */
+.plan-week-h .wk-label { font-family: var(--font-serif); font-size: 1.1rem; }
+
+/* slight refinement: hover on day row */
+.plan-day:hover { background: var(--line-soft); }
+.plan-day.done:hover { background: rgba(107,142,94,0.08); }
+
+/* refined badge */
+.badge {
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum";
+}
+
+@media (max-width: 600px) {
+  .word { font-size: 2.6rem; }
+  .card-face { padding: 2rem 1.5rem 1.5rem; }
+  .card-inner { min-height: 320px; }
+  .plan-heatmap { padding: 0.5rem; gap: 3px; }
+  .heat-cell { font-size: 0.55rem; }
+}
+
+/* short flash when scrolled-to from heatmap */
+.plan-day.flash {
+  animation: flashRow 1.2s ease-out;
+}
+@keyframes flashRow {
+  0%   { background: rgba(197,107,77,0.25); }
+  100% { background: transparent; }
+}

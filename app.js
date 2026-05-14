@@ -126,6 +126,7 @@ function renderReview() {
   if (state.reviewQueue.length === 0) {
     $("#review-empty").classList.remove("hidden");
     $("#review-card").classList.add("hidden");
+    renderEmptyGreeting();
     state.currentCard = null;
     return;
   }
@@ -133,7 +134,19 @@ function renderReview() {
   $("#review-card").classList.remove("hidden");
   state.currentCard = state.reviewQueue[0];
   state.cardShowingBack = false;
+  $("#card-inner").classList.remove("flipped");
   paintCard();
+}
+
+function renderEmptyGreeting() {
+  const h = new Date().getHours();
+  let greeting, sub;
+  if (h < 6)       { greeting = "Goedenacht.";              sub = "Geen kaarten op dit moment. Het is laat — kom morgen terug."; }
+  else if (h < 12) { greeting = "Goedemorgen, Gülpembe.";   sub = "Geen kaarten te herhalen. Voeg een woord toe als je iets nieuws tegenkomt."; }
+  else if (h < 18) { greeting = "Goedemiddag.";             sub = "Niets te herhalen op dit moment. Tijd voor een nieuw woord?"; }
+  else             { greeting = "Goedenavond.";             sub = "Geen kaarten meer vandaag. Mooi werk."; }
+  $("#empty-greeting").textContent = greeting;
+  $("#empty-sub").textContent = sub;
 }
 
 function paintCard() {
@@ -154,15 +167,12 @@ function paintCard() {
   $("#card-progress").textContent = `${idx} te gaan · ${tag}`;
   const previews = previewIntervals(c);
   $$('[data-int]').forEach((el) => { el.textContent = previews[el.dataset.int]; });
-  $("#card-back").classList.toggle("hidden", !state.cardShowingBack);
-  $("#btn-show").classList.toggle("hidden", state.cardShowingBack);
-  $("#rate-buttons").classList.toggle("hidden", !state.cardShowingBack);
 }
 
 function flipCard() {
-  if (!state.currentCard) return;
+  if (!state.currentCard || state.cardShowingBack) return;
   state.cardShowingBack = true;
-  paintCard();
+  $("#card-inner").classList.add("flipped");
 }
 
 function rateCard(rating) {
@@ -300,9 +310,22 @@ function planTotalDone() {
 
 function renderPlan() {
   updatePlanBadge();
-  const list = $("#plan-list");
   const todayIso = todayKey();
-  // group by week
+
+  // ----- heatmap: 6 rows × 10 cols of all 60 days -----
+  const heat = $("#plan-heatmap");
+  let heatHtml = "";
+  for (const d of planData) {
+    const isDone = !!state.planDone[d.day];
+    const isToday = d.date === todayIso;
+    heatHtml += `<button type="button" class="heat-cell ${isDone ? "done" : ""} ${isToday ? "is-today" : ""}"
+                         data-day="${d.day}"
+                         title="dag ${d.day} · ${escapeHtml(d.dateLabel)} · ${escapeHtml(d.theme)}">${d.day}</button>`;
+  }
+  heat.innerHTML = heatHtml;
+
+  // ----- weekly list below -----
+  const list = $("#plan-list");
   const groups = {};
   for (const d of planData) {
     if (!groups[d.week]) groups[d.week] = [];
@@ -350,6 +373,9 @@ function togglePlanDay(dayNum) {
   // update DOM in place (cheap)
   const el = $(`.plan-day[data-day="${dayNum}"]`);
   if (el) el.classList.toggle("done", state.planDone[dayNum]);
+  // also update heatmap cell
+  const heatEl = document.querySelector(`.heat-cell[data-day="${dayNum}"]`);
+  if (heatEl) heatEl.classList.toggle("done", state.planDone[dayNum]);
   // update week progress count
   const d = planData.find((x) => x.day === dayNum);
   if (d) {
@@ -514,6 +540,20 @@ function bindEvents() {
     if (!row) return;
     togglePlanDay(+row.dataset.day);
   });
+
+  // heatmap click → scroll to that day in the list below
+  $("#plan-heatmap").addEventListener("click", (e) => {
+    const cell = e.target.closest(".heat-cell");
+    if (!cell) return;
+    const dayNum = +cell.dataset.day;
+    const target = document.querySelector(`.plan-day[data-day="${dayNum}"]`);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.add("flash");
+      setTimeout(() => target.classList.remove("flash"), 1200);
+    }
+  });
+
   $("#plan-jump-today").addEventListener("click", jumpToToday);
 
   $("#btn-export").addEventListener("click", exportJson);

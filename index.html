@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>woorden — Nederlands voor Gülpembe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,38 +28,42 @@
     <!-- VANDAAG = flashcard review -->
     <section class="panel" id="panel-vandaag" data-panel="vandaag">
       <div id="review-empty" class="empty hidden">
-        <h2>Niets te herhalen vandaag.</h2>
-        <p class="muted">Voeg een nieuw woord toe of wacht tot een kaart weer aan de beurt is.</p>
+        <div class="empty-mark">✦</div>
+        <h2 id="empty-greeting">Niets te herhalen.</h2>
+        <p class="muted" id="empty-sub">Voeg een nieuw woord toe als je iets nieuws tegenkomt.</p>
         <button class="btn-primary" data-go="nieuw">+ Nieuw woord</button>
       </div>
 
       <div id="review-card" class="card hidden">
         <div class="card-meta"><span id="card-progress" class="muted small"></span></div>
-        <div class="card-front">
-          <div class="word-label muted small">Nederlands</div>
-          <div id="card-nl" class="word"></div>
-          <div id="card-voorbeeld-front" class="example muted hidden"></div>
-        </div>
-        <div class="card-back hidden" id="card-back">
-          <hr />
-          <div class="meaning-row">
-            <span class="meaning-label muted small">TR</span>
-            <span id="card-tr" class="meaning"></span>
+        <div class="card-inner" id="card-inner">
+          <div class="card-face card-front">
+            <div class="word-label muted small">Nederlands</div>
+            <div id="card-nl" class="word"></div>
+            <div id="card-voorbeeld-front" class="example muted hidden"></div>
+            <div class="card-face-actions">
+              <button id="btn-show" class="btn-primary">Toon antwoord <kbd>space</kbd></button>
+            </div>
           </div>
-          <div class="meaning-row" id="row-nldef">
-            <span class="meaning-label muted small">NL</span>
-            <span id="card-nldef" class="meaning"></span>
-          </div>
-          <div id="card-voorbeeld-back" class="example muted hidden"></div>
-          <div id="card-notitie" class="notitie muted small hidden"></div>
-        </div>
-        <div class="card-actions">
-          <button id="btn-show" class="btn-primary">Toon antwoord <kbd>space</kbd></button>
-          <div id="rate-buttons" class="rate-row hidden">
-            <button class="rate again" data-rate="again"><span class="rate-label">opnieuw</span><span class="rate-interval" data-int="again"></span><kbd>1</kbd></button>
-            <button class="rate hard"  data-rate="hard"><span class="rate-label">moeilijk</span><span class="rate-interval" data-int="hard"></span><kbd>2</kbd></button>
-            <button class="rate good"  data-rate="good"><span class="rate-label">goed</span><span class="rate-interval" data-int="good"></span><kbd>3</kbd></button>
-            <button class="rate easy"  data-rate="easy"><span class="rate-label">makkelijk</span><span class="rate-interval" data-int="easy"></span><kbd>4</kbd></button>
+          <div class="card-face card-back" id="card-back">
+            <div class="meaning-row">
+              <span class="meaning-label muted small">TR</span>
+              <span id="card-tr" class="meaning"></span>
+            </div>
+            <div class="meaning-row" id="row-nldef">
+              <span class="meaning-label muted small">NL</span>
+              <span id="card-nldef" class="meaning"></span>
+            </div>
+            <div id="card-voorbeeld-back" class="example muted hidden"></div>
+            <div id="card-notitie" class="notitie muted small hidden"></div>
+            <div class="card-face-actions">
+              <div id="rate-buttons" class="rate-row">
+                <button class="rate again" data-rate="again"><span class="rate-label">opnieuw</span><span class="rate-interval" data-int="again"></span><kbd>1</kbd></button>
+                <button class="rate hard"  data-rate="hard"><span class="rate-label">moeilijk</span><span class="rate-interval" data-int="hard"></span><kbd>2</kbd></button>
+                <button class="rate good"  data-rate="good"><span class="rate-label">goed</span><span class="rate-interval" data-int="good"></span><kbd>3</kbd></button>
+                <button class="rate easy"  data-rate="easy"><span class="rate-label">makkelijk</span><span class="rate-interval" data-int="easy"></span><kbd>4</kbd></button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -120,6 +127,9 @@
           <button class="btn-ghost small" id="plan-jump-today">→ vandaag</button>
         </div>
       </div>
+
+      <div class="plan-heatmap" id="plan-heatmap" aria-label="60-dagen overzicht"></div>
+
       <div id="plan-list"></div>
     </section>
 

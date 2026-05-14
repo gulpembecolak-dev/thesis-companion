@@ -714,3 +714,53 @@ h3 { font-family: var(--font-sans); }
   0%   { background: rgba(197,107,77,0.25); }
   100% { background: transparent; }
 }
+
+/* ============ word strength dot in lijst ============ */
+.strength-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+.strength-dot.stage-new      { background: var(--line); border: 1.5px solid var(--muted); width: 7px; height: 7px; }
+.strength-dot.stage-learning { background: var(--again); }
+.strength-dot.stage-young    { background: var(--hard); }
+.strength-dot.stage-mature   { background: var(--good); }
+
+/* ============ NL highlight in voorbeeld (back of card) ============ */
+.ex-mark {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+  font-style: normal;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 1px;
+}
+
+/* ============ notitie — small sticky-note feel ============ */
+.notitie {
+  margin-top: 1.2rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(212, 160, 76, 0.10);
+  border-left: 3px solid var(--hard);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  border-top: none;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+/* ============ reduced motion: respect system pref ============ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+}

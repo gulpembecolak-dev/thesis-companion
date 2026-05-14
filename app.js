@@ -140,11 +140,21 @@ function renderReview() {
 
 function renderEmptyGreeting() {
   const h = new Date().getHours();
+  const todayK = todayKey();
+  const reviewsToday = state.streak.reviewsDate === todayK ? state.streak.reviewsToday : 0;
+  const streak = state.streak.lastDate === todayK ? state.streak.count : 0;
+
   let greeting, sub;
-  if (h < 6)       { greeting = "Goedenacht.";              sub = "Geen kaarten op dit moment. Het is laat — kom morgen terug."; }
-  else if (h < 12) { greeting = "Goedemorgen, Gülpembe.";   sub = "Geen kaarten te herhalen. Voeg een woord toe als je iets nieuws tegenkomt."; }
-  else if (h < 18) { greeting = "Goedemiddag.";             sub = "Niets te herhalen op dit moment. Tijd voor een nieuw woord?"; }
-  else             { greeting = "Goedenavond.";             sub = "Geen kaarten meer vandaag. Mooi werk."; }
+  if (reviewsToday > 0) {
+    // celebration after clearing the queue today
+    greeting = `${reviewsToday} kaart${reviewsToday === 1 ? "" : "en"} af.`;
+    if (streak >= 7)      sub = `Mooi werk. ${streak} dagen op rij — dat begint serieus te worden.`;
+    else if (streak >= 2) sub = `Mooi werk. ${streak} dagen op rij.`;
+    else                  sub = "Mooi werk. Begin van een nieuwe streak.";
+  } else if (h < 6)       { greeting = "Goedenacht.";            sub = "Geen kaarten op dit moment. Het is laat — kom morgen terug."; }
+  else if (h < 12)        { greeting = "Goedemorgen, Gülpembe."; sub = "Geen kaarten te herhalen. Voeg een woord toe als je iets nieuws tegenkomt."; }
+  else if (h < 18)        { greeting = "Goedemiddag.";           sub = "Niets te herhalen op dit moment. Tijd voor een nieuw woord?"; }
+  else                    { greeting = "Goedenavond.";           sub = "Geen kaarten meer vandaag. Mooi werk."; }
   $("#empty-greeting").textContent = greeting;
   $("#empty-sub").textContent = sub;
 }
@@ -158,7 +168,7 @@ function paintCard() {
   else $("#row-nldef").classList.add("hidden");
   const exB = $("#card-voorbeeld-back");
   $("#card-voorbeeld-front").classList.add("hidden");
-  if (c.voorbeeld) { exB.textContent = c.voorbeeld; exB.classList.remove("hidden"); }
+  if (c.voorbeeld) { exB.innerHTML = highlightNlInExample(c.voorbeeld, c.nl); exB.classList.remove("hidden"); }
   else exB.classList.add("hidden");
   if (c.notitie) { $("#card-notitie").textContent = c.notitie; $("#card-notitie").classList.remove("hidden"); }
   else $("#card-notitie").classList.add("hidden");
@@ -167,6 +177,19 @@ function paintCard() {
   $("#card-progress").textContent = `${idx} te gaan · ${tag}`;
   const previews = previewIntervals(c);
   $$('[data-int]').forEach((el) => { el.textContent = previews[el.dataset.int]; });
+}
+
+function escapeRegex(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function highlightNlInExample(example, nl) {
+  if (!example) return "";
+  const escaped = escapeHtml(example);
+  if (!nl) return escaped;
+  // strip leading 'de ' / 'het ' / 'een '
+  const core = nl.trim().replace(/^(de|het|een)\s+/i, "");
+  if (!core) return escaped;
+  // match the core stem plus simple Dutch inflection (e, en, er, t, s)
+  const pattern = new RegExp(`\\b(${escapeRegex(core)}[a-zëéèêïíìîöóòôüúùûäáàâ]{0,4})\\b`, "gi");
+  return escaped.replace(pattern, '<mark class="ex-mark">$1</mark>');
 }
 
 function flipCard() {
@@ -214,12 +237,16 @@ function renderList() {
                     : due ? "vandaag"
                     : daysToNext < 1 ? "< 1 d"
                     : formatInterval(daysToNext);
+    const stage = wordStage(w);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="nl-cell">${escapeHtml(w.nl)}</td>
       <td>${escapeHtml(w.tr || "")}</td>
       <td>${escapeHtml(w.nldef || "")}</td>
-      <td class="num">${nextLabel}</td>
+      <td class="num">
+        <span class="strength-dot stage-${stage}" title="${strengthLabel(stage)}"></span>
+        ${nextLabel}
+      </td>
       <td class="num">${w.reviewCount || 0}</td>
       <td class="row-actions">
         <button class="icon-btn" data-act="edit" data-id="${w.id}" title="bewerk">✎</button>
@@ -227,6 +254,17 @@ function renderList() {
       </td>`;
     tbody.appendChild(tr);
   }
+}
+
+function wordStage(w) {
+  if ((w.reviewCount || 0) === 0) return "new";
+  const i = w.interval || 0;
+  if (i < 7) return "learning";
+  if (i < 21) return "young";
+  return "mature";
+}
+function strengthLabel(stage) {
+  return { new: "nieuw", learning: "leren", young: "jong", mature: "rijp" }[stage] || "";
 }
 
 /* ---------- new/edit form ---------- */
